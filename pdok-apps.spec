@@ -9,6 +9,7 @@ Release:        1
 %define         install_user     apache
 %define         prefix          /apps
 %define         apps_prefix %{prefix}/geoservices
+%define         apiserver demo-geoservices.rijkswaterstaat.nl
 
 Summary:        PDOK applications
 License:        GPLv3
@@ -67,6 +68,7 @@ svn export -q https://github.com/Geonovum/pdokkaart/trunk pdokkaart
 %{__cp} -a vegetatielegger/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/vegetatielegger/
 %{__cp} -a configuratie/pdok_apps.conf $RPM_BUILD_ROOT/%{apps_prefix}/httpd.d/
 %{__cp} -a pdokapps/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/pdokapps/
+sed -i s/pdokserver/%{apiserver}/g $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokapps/**/*.html
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
