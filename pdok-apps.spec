@@ -67,7 +67,9 @@ svn export -q https://github.com/Geonovum/pdokkaart/trunk pdokkaart
 %{__cp} -a pdokkaart/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/pdokkaart/
 %{__cp} -a vegetatielegger/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/vegetatielegger/
 %{__cp} -a configuratie/pdok_apps.conf $RPM_BUILD_ROOT/%{apps_prefix}/httpd.d/
+%{__cp} -a configuratie/proxy.py $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokkaart/
 %{__cp} -a pdokapps/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/pdokapps/
+sed -i s/pdokserver/%{apiserver}/g $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokkaart/api/js/pdok-api.js
 sed -i s/pdokserver/%{apiserver}/g $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokapps/**/*.html
 
 %clean
@@ -102,6 +104,8 @@ sed -i s/pdokserver/%{apiserver}/g $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokapps/*
 %{apps_prefix}/apps/pdokapps/*
 
 %changelog
+* Tue Apr  7 2015 Milo van der Linden  1.0.7-2
+- RWS specific proxy.py moved to configuration
 * Tue Apr  7 2015 Milo van der Linden  1.0.7-1
 - Added the pdokkaart-applications
 * Tue Apr  7 2015 Milo van der Linden  1.0.6-1
