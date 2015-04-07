@@ -4,7 +4,7 @@
 
 Name:           pdok-apps
 Version:        %{version}
-Release:        1
+Release:        3
 
 %define         install_user     apache
 %define         prefix          /apps
@@ -71,7 +71,8 @@ svn export -q https://github.com/Geonovum/pdokkaart/trunk pdokkaart
 %{__cp} -a pdokapps/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/pdokapps/
 sed -i s/pdokserver/%{apiserver}/g $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokkaart/api/js/pdok-api.js
 sed -i s/pdokserver/%{apiserver}/g $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokapps/**/*.html
-
+sed -i 's/^Pdok.ApiUrl.*$/Pdok.ApiUrl = window.location.protocol \+ \"\/\/\" \+ \"%{apiserver}\/pdokkaart\/api\"\; \/\/ rws url/g' $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokkaart/api/js/pdok-api.js
+sed -i 's/^OpenLayers.ProxyHost.*$/OpenLayers.ProxyHost = window.location.protocol \+ \"\/\/\" \+ \"%{apiserver}\/proxy\?url=\"\; \/\/ rws proxy/g' $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokkaart/api/js/pdok-api.js
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
@@ -104,6 +105,8 @@ sed -i s/pdokserver/%{apiserver}/g $RPM_BUILD_ROOT%{apps_prefix}/apps/pdokapps/*
 %{apps_prefix}/apps/pdokapps/*
 
 %changelog
+* Tue Apr  7 2015 Milo van der Linden  1.0.7-3
+- Added sed for ApiUrl and ProxyHost
 * Tue Apr  7 2015 Milo van der Linden  1.0.7-2
 - RWS specific proxy.py moved to configuration
 * Tue Apr  7 2015 Milo van der Linden  1.0.7-1
