@@ -1,7 +1,6 @@
 #!/usr/bin/rpmbuild -ba
-# to build for trunk from svn workdir, add -D 'trunk 1'
 
-%define         version 1.0.5
+%define         version 1.0.7
 
 Name:           pdok-apps
 Version:        %{version}
@@ -15,7 +14,6 @@ Summary:        PDOK applications
 License:        GPLv3
 Group:          Applications/Internet
 Packager:       Milo van der Linden
-Source:         pdok-apps-%{version}.tgz
 
 BuildArch:      noarch
 Buildroot:      %{_tmppath}/%{name}-root
@@ -25,7 +23,7 @@ Requires:       httpd
 Autoreq:        1
 
 %description
-pdokkaart javascript module and applications created for Rijkswaterstaat that us the pdokkaart or the pdokkaart-api. Applications can be found in subpackages.
+pdokkaart javascript module and applications created for Rijkswaterstaat that use the pdokkaart or the pdokkaart-api. Applications can be found in subpackages.
 
 %package -n pdok-apps-vegetatielegger
 Summary:        vegetatielegger
@@ -34,18 +32,24 @@ Requires:       pdok-apps
 %description -n pdok-apps-vegetatielegger
 pdokkaart vegetatielegger application.
 
-%package -n pdok-apps-kustlijnkaart
-Summary:        kustlijnkaart
+%package -n pdok-apps-apps
+Summary:        apps
 Group:          Applications/Internet
 Requires:       pdok-apps
-%description -n pdok-apps-kustlijnkaart
-pdokkaart kustlijnkaart application.
+%description -n pdok-apps-apps
+pdokkaart based applications.
 
 %prep
-%setup -q -n pdok-apps-%{version}
 
 %build
-# remove unwanted files
+rm -Rf vegetatielegger %{buildroot}
+rm -Rf pdokkaart %{buildroot}
+rm -Rf configuratie %{buildroot}
+rm -Rf pdokapps %{buildroot}
+svn export -q https://github.com/RWS-CIV-IRN-TBP/vegetatielegger/trunk vegetatielegger
+svn export -q https://github.com/RWS-CIV-IRN-TBP/pdokkaart-configuratie/trunk configuratie
+svn export -q https://github.com/RWS-CIV-IRN-TBP/pdokkaart-applicaties/trunk pdokapps
+svn export -q https://github.com/Geonovum/pdokkaart/trunk pdokkaart
 
 # skip brp-strip* at end of install (not needed for noarch)
 %define __os_install_post /usr/lib/rpm/brp-compress %{nil}
@@ -54,7 +58,15 @@ pdokkaart kustlijnkaart application.
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 # services
 %{__mkdir} -p $RPM_BUILD_ROOT/%{apps_prefix}
-%{__cp} -a * $RPM_BUILD_ROOT/%{apps_prefix}
+%{__mkdir} -p $RPM_BUILD_ROOT/%{apps_prefix}/apps/pdokkaart/
+%{__mkdir} -p $RPM_BUILD_ROOT/%{apps_prefix}/apps/vegetatielegger/
+%{__mkdir} -p $RPM_BUILD_ROOT/%{apps_prefix}/apps/pdokapps/
+%{__mkdir} -p $RPM_BUILD_ROOT/%{apps_prefix}/httpd.d/
+
+%{__cp} -a pdokkaart/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/pdokkaart/
+%{__cp} -a vegetatielegger/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/vegetatielegger/
+%{__cp} -a configuratie/pdok_apps.conf $RPM_BUILD_ROOT/%{apps_prefix}/httpd.d/
+%{__cp} -a pdokapps/* $RPM_BUILD_ROOT/%{apps_prefix}/apps/pdokapps/
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -63,11 +75,7 @@ pdokkaart kustlijnkaart application.
 #nothing
 %post -n pdok-apps
 /sbin/service httpd reload
-#nothing
 %post -n pdok-apps-vegetatielegger
-#nothing
-%post -n pdok-apps-kustlijnkaart
-
 
 %preun
 
@@ -75,25 +83,27 @@ pdokkaart kustlijnkaart application.
 
 %files -n pdok-apps
 %defattr(-,%{install_user},%{install_user})
-%config(noreplace) %{apps_prefix}/httpd.d/pdok_apps.conf
 %dir               %{apps_prefix}/apps/pdokkaart
-%exclude           %{apps_prefix}/apps/pdokkaart/.gitignore
 %{apps_prefix}/apps/pdokkaart/*
+%dir               %{apps_prefix}/httpd.d
+%{apps_prefix}/httpd.d/pdok_apps.conf
+
 
 %files -n pdok-apps-vegetatielegger
 %defattr(-,%{install_user},%{install_user})
 %dir               %{apps_prefix}/apps/vegetatielegger
-%exclude           %{apps_prefix}/apps/vegetatielegger/.gitignore
 %{apps_prefix}/apps/vegetatielegger/*
 
-%files -n pdok-apps-kustlijnkaart
+%files -n pdok-apps-apps
 %defattr(-,%{install_user},%{install_user})
-%dir               %{apps_prefix}/apps/kustlijnkaart
-%exclude           %{apps_prefix}/apps/kustlijnkaart/.gitignore
-%{apps_prefix}/apps/kustlijnkaart/*
-
+%dir               %{apps_prefix}/apps/pdokapps
+%{apps_prefix}/apps/pdokapps/*
 
 %changelog
+* Tue Apr  7 2015 Milo van der Linden  1.0.7-1
+- Added the pdokkaart-applications
+* Tue Apr  7 2015 Milo van der Linden  1.0.6-1
+- Building from subversion
 * Thu Mar 12 2015 Milo van der Linden  1.0.5-1
 - Switched to RWS-CIV-IRN-TBP repository
 - Kustlijnkaart added
